@@ -5,3 +5,6 @@ def search_posts(session, search, page, post_limit):
 
 def search_favorites(session):
 	return session.get("https://e621.net/favorites.json").json()
+
+def get_profile(session, user_id):
+	return session.get("https://e621.net/users/{}.json".format(user_id)).json()

@@ -1,6 +1,7 @@
 import requests
 import methods.getmethods
 import structs.post
+import structs.profile
 
 class FurREST:
 	def __init__(self, username, api_key):
@@ -27,3 +28,12 @@ class FurREST:
 		for post in methods.getmethods.search_favorites(self.session)["posts"]:
 			posts.append(structs.post.Post(post))
 		return posts
+
+	def get_profile_raw(self, user):
+		return methods.getmethods.get_profile(self.session, user)
+
+	def get_profile(self, user):
+		return structs.profile.ProfileOther(methods.getmethods.get_profile(self.session, user))
+
+	def profile(self):
+		return structs.profile.ProfileSelf(methods.getmethods.get_profile(self.session, self.username))
