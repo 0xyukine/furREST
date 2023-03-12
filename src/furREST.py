@@ -2,6 +2,8 @@ import requests
 import methods.getmethods
 import structs.post
 import structs.profile
+import structs.pool
+import structs.set
 
 class FurREST:
 	def __init__(self, username, api_key):
@@ -40,3 +42,25 @@ class FurREST:
 
 	def profile(self):
 		return structs.profile.ProfileSelf(methods.getmethods.get_profile(self.session, self.username))
+
+	def get_pools(self, name="", pool_id="", desc="", creator="", creator_id="", active="", category="", order="", limit=75, raw=False):
+		params = "?"\
+			f"search[name_matches]={name}&"\
+			f"search[id]={pool_id}&"\
+			f"search[description_matches]={desc}&"\
+			f"search[creator_name]={creator}&"\
+			f"search[creator_id]={creator_id}&"\
+			f"search[is_active]={active}&"\
+			f"search[category]={category}&"\
+			f"search[order]={order}&"\
+			f"limit={limit}"
+
+		print(params)
+
+		if raw == True:
+			return methods.getmethods.get_pools(self.session, params)
+		elif raw == False:
+			pools = []
+			for pool in methods.getmethods.get_pools(self.session, params):
+				pools.append(structs.pool.Pool(pool))
+			return pools
