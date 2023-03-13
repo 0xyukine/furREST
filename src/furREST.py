@@ -1,3 +1,4 @@
+import time
 import requests
 import methods.getmethods
 import structs.post
@@ -55,7 +56,7 @@ class FurREST:
 			f"search[order]={order}&"\
 			f"limit={limit}"
 
-		print(params)
+		print("Getting pools: " + params)
 
 		if raw == True:
 			return methods.getmethods.get_pools(self.session, params)
@@ -64,3 +65,34 @@ class FurREST:
 			for pool in methods.getmethods.get_pools(self.session, params):
 				pools.append(structs.pool.Pool(pool))
 			return pools
+
+	def get_sets(self, name="", set_id="", shortname="", creator="", creator_id="", order="", limit=75, raw=False):
+		params = "?"\
+			f"search[name]={name}&"\
+			f"search[id]={set_id}&"\
+			f"search[shortname]={shortname}&"\
+			f"search[order]={order}&"\
+			f"search[creator_name]={creator}&"\
+			f"search[creator_id]={creator_id}&"\
+			f"limit={limit}"
+
+		print("Getting sets: " + params)
+
+		if raw == True:
+			return methods.getmethods.get_sets(self.session, params)
+		elif raw == False:
+			sets = []
+			for set in methods.getmethods.get_sets(self.session, params):
+				sets.append(structs.set.Set(set))
+			return sets
+
+	def get_popular(self, date=time.gmtime(), scale="day", raw=False):
+		params = f"?date={time.strftime('%Y-%m-%d',date)}&scale={scale}"
+
+		if raw == True:
+			return methods.getmethods.get_popular(self.session, params)
+		elif raw == False:
+			posts = []
+			for post in methods.getmethods.get_popular(self.session, params)["posts"]:
+				posts.append(structs.post.Post(post))
+			return posts

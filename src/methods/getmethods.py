@@ -12,7 +12,7 @@ def get_profile(session, user_id):
 	return session.get(f"{BASE_URL}/{user_id}.json").json()
 
 def get_popular(session, params):
-	return session.get(f"{BASE_URL}/").json()
+	return session.get(f"{BASE_URL}/popular.json{params}").json()
 
 def get_pools(session, params):
 	return session.get(f"{BASE_URL}/pools.json{params}").json()
