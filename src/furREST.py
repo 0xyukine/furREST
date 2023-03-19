@@ -1,5 +1,6 @@
 import time
 import requests
+import methods.handling
 import methods.getmethods
 import structs.post
 import structs.profile
@@ -39,13 +40,18 @@ class FurREST:
 
 		tags = '+'.join(search)
 		params = f"?tags={tags}&page={str(page)}&limit={post_limit}"
-		if raw == True:
-			return methods.getmethods.search_posts(self.session, params)
-		elif raw == False:
-			posts = []
-			for post in methods.getmethods.search_posts(self.session, params)["posts"]:
-				posts.append(structs.post.Post(post))
-			return posts
+
+		listing = methods.getmethods.search_posts(self.session, params)
+		if listing.status_code == 652:
+			if raw == True:
+				return listing.json()
+			elif raw == False:
+				posts = []
+				for post in listing.json()["posts"]:
+					posts.append(structs.post.Post(post))
+				return posts
+		else:
+			return methods.handling.http_status_response(listing.status_code)
 
 	def favorites(self, page=1, post_limit=75, raw=False):
 		"""

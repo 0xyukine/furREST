@@ -3,7 +3,7 @@ import requests
 BASE_URL = "https://e621.net"
 
 def search_posts(session, params):
-	return session.get(f"{BASE_URL}/posts.json{params}").json()
+	return session.get(f"{BASE_URL}/posts.json{params}")
 
 def search_favorites(session, params):
 	return session.get(f"{BASE_URL}/favorites.json{params}").json()
