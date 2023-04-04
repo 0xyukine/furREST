@@ -1,3 +1,14 @@
+def check_search(search):
+	if type(search) != list and type(search) != str:
+		return "Search parameter is not a list or a string"
+	elif type(search) == list:
+		for item in search:
+			if type(item) != str:
+				return "List contains non-string items"
+	
+	return True
+
+
 def http_status_response(status_code):
 	"""
 	Unnecessarily long method for handling http status code responses

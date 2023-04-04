@@ -1,11 +1,13 @@
-import time
-import requests
 import methods.handling
 import methods.getmethods
-import structs.post
 import structs.profile
+import structs.post
 import structs.pool
 import structs.set
+
+import requests
+import time
+import os
 
 class FurREST:
 	def __init__(self, username, api_key):
@@ -38,11 +40,19 @@ class FurREST:
 			A list of posts in json form
 		"""
 
-		tags = '+'.join(search)
+		if (check_return := methods.handling.check_search(search)) != True:
+			return "bad search: " + check_return
+
+		if type(search) == list:
+			tags = '+'.join(search)
+		else:
+			tags = search
 		params = f"?tags={tags}&page={str(page)}&limit={post_limit}"
 
+		print(params)
+
 		listing = methods.getmethods.search_posts(self.session, params)
-		if listing.status_code == 652:
+		if listing.status_code == 200:
 			if raw == True:
 				return listing.json()
 			elif raw == False:
@@ -262,3 +272,9 @@ class FurREST:
 			for post in methods.getmethods.get_popular(self.session, params)["posts"]:
 				posts.append(structs.post.Post(post))
 			return posts
+
+	def save_image(self, post, path, filename):
+		image = self.session.get(post.file.url).content
+		os.makedirs(os.path.dirname(f"{path}/{post.file.url.split('/')[2:]}"), exist_ok=True)
+		with open(f"{post.id}.{post.file.ext}", 'wb') as handler:
+			handler.write(image)
