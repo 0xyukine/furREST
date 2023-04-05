@@ -6,10 +6,10 @@ def search_posts(session, params):
 	return session.get(f"{BASE_URL}/posts.json{params}")
 
 def search_favorites(session, params):
-	return session.get(f"{BASE_URL}/favorites.json{params}").json()
+	return session.get(f"{BASE_URL}/favorites.json{params}")
 
 def get_profile(session, user_id):
-	return session.get(f"{BASE_URL}/{user_id}.json").json()
+	return session.get(f"{BASE_URL}/{user_id}.json")
 
 def get_popular(session, params):
 	return session.get(f"{BASE_URL}/popular.json{params}").json()

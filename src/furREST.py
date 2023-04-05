@@ -1,5 +1,6 @@
 import methods.handling
 import methods.getmethods
+import structs.exceptions
 import structs.profile
 import structs.post
 import structs.pool
@@ -41,7 +42,24 @@ class FurREST:
 		"""
 
 		if (check_return := methods.handling.check_search(search)) != True:
-			return "bad search: " + check_return
+			raise TypeError(f"Bad search query: {check_return}")
+
+		if type(page) == int:
+			if page < 0:
+				raise ValueError("page argument must be a positive integer")
+		else:
+			raise TypeError("page argument is not of type int")
+
+		if type(post_limit) == int:
+			if post_limit >= 320:
+				raise ValueError("Post limit exceeds 320")
+			elif post_limit < 0:
+				raise ValueError("Post limit must be a positive integer")
+		else:
+			raise TypeError("post_limit argument is not of type int")
+
+		if not type(raw) == bool:
+			raise TypeError("raw argument is not of type bool")
 
 		if type(search) == list:
 			tags = '+'.join(search)
@@ -49,19 +67,18 @@ class FurREST:
 			tags = search
 		params = f"?tags={tags}&page={str(page)}&limit={post_limit}"
 
-		print(params)
-
 		listing = methods.getmethods.search_posts(self.session, params)
 		if listing.status_code == 200:
+			listing = listing.json()
 			if raw == True:
-				return listing.json()
+				return listing
 			elif raw == False:
 				posts = []
-				for post in listing.json()["posts"]:
+				for post in listing["posts"]:
 					posts.append(structs.post.Post(post))
 				return posts
 		else:
-			return methods.handling.http_status_response(listing.status_code)
+			raise structs.exceptions.HttpException(methods.handling.http_status_response(listing.status_code))
 
 	def favorites(self, page=1, post_limit=75, raw=False):
 		"""
@@ -84,14 +101,38 @@ class FurREST:
 			A list of posts in json form
 		"""
 
-		params = f"?page={str(page)}&limit={post_limit}"
-		if raw == True:
-			return methods.getmethods.search_favorites(self.session, params)
-		elif raw == False:
-			posts = []
-			for post in methods.getmethods.search_favorites(self.session, params)["posts"]:
-				posts.append(structs.post.Post(post))
-			return posts
+		if (check_return := methods.handling.check_search(search)) != True:
+			raise TypeError(f"Bad search query: {check_return}")
+
+		if type(page) == int:
+			if page < 0:
+				raise ValueError("page argument must be a positive integer")
+		else:
+			raise TypeError("page argument is not of type int")
+
+		if type(post_limit) == int:
+			if post_limit >= 320:
+				raise ValueError("Post limit exceeds 320")
+			elif post_limit < 0:
+				raise ValueError("Post limit must be a positive integer")
+		else:
+			raise TypeError("post_limit argument is not of type int")
+
+		if not type(raw) == bool:
+			raise TypeError("raw argument is not of type bool")
+
+		listing = methods.getmethods.search_favorites(self.session, params)
+		if listing.status_code == 200:
+			listing = listing.json()
+			if raw == True:
+				return listing
+			elif raw == False:
+				posts = []
+				for post in listing["posts"]:
+					posts.append(structs.post.Post(post))
+				return posts
+		else:
+			raise structs.exceptions.HttpException(methods.handling.http_status_response(listing.status_code))
 
 	def get_profile(self, user, raw=False):
 		"""
@@ -113,10 +154,15 @@ class FurREST:
 
 		"""
 
-		if raw == True:
-			return methods.getmethods.get_profile(self.session, user)
-		elif raw == False:
-			return structs.profile.ProfileOther(methods.getmethods.get_profile(self.session, user))
+		response = methods.getmethods.get_profile(self.session, user)
+		if response.status_code == 200:
+			response = response.json()
+			if raw == True:
+				return response
+			elif raw == False:
+				return structs.profile.ProfileOther(response)
+		else:
+			raise structs.exceptions.HttpException(methods.handling.http_status_response(response.status_code))
 
 	def profile(self):
 		"""
@@ -128,7 +174,12 @@ class FurREST:
 			An instance of the profile class containing all of the user's information
 		"""
 
-		return structs.profile.ProfileSelf(methods.getmethods.get_profile(self.session, self.username))
+		response = methods.getmethods.get_profile(self.session, self.username)
+		if response.status_code == 200:
+			response = response.json()
+			return structs.profile.ProfileSelf(response)
+		else:
+			structs.exceptions.HttpException(methods.handling.http_status_response(respone.status_code))
 
 	def get_pools(self, name="", pool_id="", desc="", creator="", creator_id="", active="", category="", order="", page=1, limit=75, raw=False):
 		"""
